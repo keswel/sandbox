@@ -54,9 +54,9 @@ renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
 // Cube
 const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
+const material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
 const cube = new THREE.Mesh(geometry, material)
-cube.position.set(0, 0.9, 0)
+cube.position.set(0, 1, 0)
 scene.add(cube)
 
 // Cube Stars
@@ -64,17 +64,23 @@ const star_width = 100;
 const star_length = 100;
 const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 let star_array = new Array()
-for (let i=0; i<1000; i++) {
+for (let i=0; i<1200; i++) {
   const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.1, 32, 10), star_material)
   star.position.set(
     Math.random() * star_width - 50,
-    Math.random() * 5 + 10,
+    Math.random() * 25 + 5,
     Math.random() * star_length- 50
   )
-  const color = new THREE.Color(
+  /* const color = new THREE.Color(
     Math.random() * orb_random_color_intensity + 1,
     Math.random() * orb_random_color_intensity + 1,
     Math.random() * orb_random_color_intensity + 1
+  ) 
+  */
+  const color = new THREE.Color(
+    255 - 235,
+    209 - 207,
+    220 - 210
   )
 
   star.material.color.copy(color)
@@ -101,8 +107,9 @@ floor.receiveShadow = true
 scene.add(floor)  
 
 // Light
-const light = new THREE.DirectionalLight(0xffffff, 1)
-light.position.set(5, 100, 5)
+const light = new THREE.DirectionalLight(0xffffff, 2.2)
+light.position.set(0, 1, 0)
+//light.position.set(5, 100, 5)
 scene.add(light)
 
 // Resize handling
@@ -126,7 +133,7 @@ const filmPass = new FilmPass(
 )
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
-  0.6,
+  0.1,
   0.7,
   0.85
 )
@@ -143,7 +150,7 @@ function animate() {
     
     if (star_array[i].position.x > 50) star_array[i].position.x = -50
   }
-  //if (orb_random_color_intensity < 10) orb_random_color_intensity += 0.01
+  // if (orb_random_color_intensity < 10) orb_random_color_intensity += 0.01
 
   // WASD movement
   camera.getWorldDirection(direction)
