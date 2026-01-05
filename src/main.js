@@ -64,11 +64,11 @@ const star_width = 100;
 const star_length = 100;
 const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 let star_array = new Array()
-for (let i=0; i<1200; i++) {
-  const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.1, 32, 10), star_material)
+for (let i=0; i<1000; i++) {
+  const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.2, 32, 10), star_material)
   star.position.set(
     Math.random() * star_width - 50,
-    Math.random() * 25 + 5,
+    Math.random() * 30 + 10,
     Math.random() * star_length- 50
   )
   /* const color = new THREE.Color(
