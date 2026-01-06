@@ -4,8 +4,9 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x111111)
+scene.background = new THREE.Color(0xcccccc)
 
 const keys = { 
   w: false,
@@ -33,7 +34,10 @@ const camera = new THREE.PerspectiveCamera(
 )
 camera.position.set(0, 1.6, 5)
 
+
+
 // crosshair
+const raycaster = new THREE.Raycaster() // used for raycasting from crosshair
 const crosshair_material = new THREE.LineBasicMaterial({ color: 0xffffff })
 const size = 0.001
 
@@ -52,13 +56,14 @@ scene.add(camera)
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
-// Cube
+renderer.domElement.addEventListener('click', onClick)
+/* Cube
 const geometry = new THREE.BoxGeometry()
 const material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
 const cube = new THREE.Mesh(geometry, material)
 cube.position.set(0, 1, 0)
 scene.add(cube)
-
+*/
 // Cube Stars
 const star_width = 100;
 const star_length = 100;
@@ -106,9 +111,33 @@ floor.material = new THREE.MeshPhongMaterial({
 floor.receiveShadow = true
 scene.add(floor)  
 
+// mp3 player
+const mp3_backboard_geometry = new THREE.BoxGeometry(2, 1, 0.1)
+const mp3_play_geometry = new THREE.BoxGeometry(0.5, 0.5, 0.1)
+
+const mp3_play_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+const mp3_backboard_material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
+const mp3_backboard = new THREE.Mesh(mp3_backboard_geometry, mp3_backboard_material)
+const mp3_play = new THREE.Mesh(mp3_play_geometry, mp3_play_material)
+const mp3_back = new THREE.Mesh(mp3_play_geometry, mp3_play_material)
+const mp3_skip = new THREE.Mesh(mp3_play_geometry, mp3_play_material)
+
+let button_gap = 0.6;
+mp3_backboard.position.set(0, 1, 0)
+mp3_play.position.set(0, 1, 0.1)
+mp3_skip.position.set(button_gap, 1, 0.1)
+mp3_back.position.set(-button_gap, 1, 0.1)
+
+scene.add(mp3_backboard)
+scene.add(mp3_play)
+scene.add(mp3_skip)
+scene.add(mp3_back)
+
+
+
 // Light
-const light = new THREE.DirectionalLight(0xffffff, 2.2)
-light.position.set(0, 1, 0)
+const light = new THREE.DirectionalLight(0xffffff, 4.2)
+light.position.set(-0, 3, 5)
 //light.position.set(5, 100, 5)
 scene.add(light)
 
@@ -126,23 +155,48 @@ const composer = new EffectComposer(renderer)
 const renderPass = new RenderPass(scene, camera)
 composer.addPass(renderPass)
 const filmPass = new FilmPass(
-  0.35, 
+  0.15, 
   0.9,
-  256,
-  false, 
 )
 const bloomPass = new UnrealBloomPass(
   new THREE.Vector2(window.innerWidth, window.innerHeight),
   0.1,
-  0.7,
+  0.5,
   0.85
 )
+
+// ray cast function doesn't quite work yet.
+function onClick() {
+  if (!controls.isLocked) return
+  raycaster.setFromCamera({ x: 0, y: 0 }, camera)
+
+  const intersects = raycaster.intersectObjects(
+    [mp3_play, mp3_back, mp3_skip],
+    false
+  )
+
+  if (!intersects.length) return
+  console.log(intersects)
+
+  const clicked = intersects[0].object
+
+  if (clicked === mp3_play) {
+    console.log('PLAY')
+  } else if (clicked === mp3_back) {
+    console.log('BACK')
+  } else if (clicked === mp3_skip) {
+    console.log('SKIP')
+  }
+}
+
+
+
 composer.addPass(bloomPass)
 composer.addPass(filmPass)
 function animate() {
   requestAnimationFrame(animate)
-  cube.rotation.x += 0.01
-  cube.rotation.y += 0.01
+  //cube.rotation.x += 0.01
+  //cube.rotation.y += 0.01
 
   for (let i=0; i<star_array.length; i++) {
     star_array[i].position.x += 0.01
