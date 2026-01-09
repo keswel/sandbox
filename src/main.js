@@ -4,6 +4,9 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
+import { Font, FontLoader } from 'three/addons/loaders/FontLoader.js'
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'
+
 
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(0xcccccc)
@@ -12,18 +15,29 @@ const keys = {
   w: false,
   a: false,
   s: false,
-  d: false
+  d: false,
+  space: false,
+  shift: false
 }
 const speed = 0.05
 let orb_random_color_intensity = 2
 
 window.addEventListener('keydown', (e) => {
-  if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = true
+  const key = e.key.toLowerCase()
+
+  if (key in keys) keys[key] = true
+  if (key === ' ') keys.space = true
+  if (key === 'shift') keys.shift = true
 })
 
 window.addEventListener('keyup', (e) => {
-  if (e.key.toLowerCase() in keys) keys[e.key.toLowerCase()] = false
+  const key = e.key.toLowerCase()
+
+  if (key in keys) keys[key] = false
+  if (key === ' ') keys.space = false
+  if (key === 'shift') keys.shift = false
 })
+
 
 
 const camera = new THREE.PerspectiveCamera(
@@ -56,7 +70,13 @@ scene.add(camera)
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize(window.innerWidth, window.innerHeight)
 document.body.appendChild(renderer.domElement)
-renderer.domElement.addEventListener('click', onClick)
+renderer.domElement.addEventListener('click', () => {
+  if (!controls.isLocked) {
+    controls.lock()
+    return
+  }
+  onClick()
+})
 /* Cube
 const geometry = new THREE.BoxGeometry()
 const material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
@@ -73,7 +93,7 @@ for (let i=0; i<1000; i++) {
   const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.2, 32, 10), star_material)
   star.position.set(
     Math.random() * star_width - 50,
-    Math.random() * 30 + 10,
+    Math.random() * 50 + 0,
     Math.random() * star_length- 50
   )
   /* const color = new THREE.Color(
@@ -95,7 +115,7 @@ for (let i=0; i<1000; i++) {
 // maybe i can convert all these stars into a single object and shift them so the center is 0
       
 const controls = new PointerLockControls(camera, document.body)
-document.addEventListener('click', () => controls.lock())
+
 
 // Floor plane
 const floorGeometry = new THREE.PlaneGeometry(100, 100)
@@ -141,7 +161,7 @@ light.position.set(-0, 3, 5)
 //light.position.set(5, 100, 5)
 scene.add(light)
 
-// Resize handling
+// resize handling
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight
   camera.updateProjectionMatrix()
@@ -164,9 +184,8 @@ const bloomPass = new UnrealBloomPass(
   0.5,
   0.85
 )
-
-// ray cast function doesn't quite work yet.
 function onClick() {
+  console.write("CLICKED")
   if (!controls.isLocked) return
   raycaster.setFromCamera({ x: 0, y: 0 }, camera)
 
@@ -215,6 +234,8 @@ function animate() {
   if (keys.a) camera.position.addScaledVector(right, -speed)
   if (keys.s) camera.position.addScaledVector(direction, -speed)
   if (keys.d) camera.position.addScaledVector(right, speed)
+  if (keys.space) camera.position.y += speed
+  if (keys.shift) camera.position.y -= speed
   controls.update()
   composer.render()
 
