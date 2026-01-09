@@ -17,6 +17,7 @@ const keys = {
   s: false,
   d: false,
   i: false,
+  o: false,
   space: false,
   shift: false
 }
@@ -117,12 +118,14 @@ for (let i=0; i<1000; i++) {
     Math.random() * 50 + 0,
     Math.random() * star_length- 50
   )
-  /* const color = new THREE.Color(
+  /*
+  const color = new THREE.Color(
     Math.random() * orb_random_color_intensity + 1,
     Math.random() * orb_random_color_intensity + 1,
     Math.random() * orb_random_color_intensity + 1
   ) 
   */
+
   const color = new THREE.Color(
     255 - 235,
     209 - 207,
@@ -181,10 +184,10 @@ mp3_play.position.set(0, 1, 0.1)
 mp3_skip.position.set(button_gap, 1, 0.1)
 mp3_back.position.set(-button_gap, 1, 0.1)
 
-scene.add(mp3_backboard)
-scene.add(mp3_play)
-scene.add(mp3_skip)
-scene.add(mp3_back)
+// scene.add(mp3_backboard)
+// scene.add(mp3_play)
+// scene.add(mp3_skip)
+// scene.add(mp3_back)
 
 
 
@@ -245,7 +248,15 @@ function initStars() {
     star_array[i].userData.target = new THREE.Vector3(0, 2, 0)
   }
 }
-
+function randomizeStars() {
+  for (let i=0; i<star_array.length; i++) {
+    star_array[i].position.set(
+      Math.random() * star_width - 50,
+      Math.random() * 50 + 0,
+      Math.random() * star_length- 50
+    )
+  }
+}
 
 composer.addPass(bloomPass)
 composer.addPass(filmPass)
@@ -275,7 +286,7 @@ function animate() {
   }
 
   
-  // if (orb_random_color_intensity < 10) orb_random_color_intensity += 0.01
+  if (orb_random_color_intensity < 10) orb_random_color_intensity += 0.01
 
   // WASD movement
   camera.getWorldDirection(direction)
@@ -287,6 +298,7 @@ function animate() {
   if (keys.s) camera.position.addScaledVector(direction, -speed)
   if (keys.d) camera.position.addScaledVector(right, speed)
   if (keys.i) initStars()
+  if (keys.o) randomizeStars()
   if (keys.space) camera.position.y += speed
   if (keys.shift) camera.position.y -= speed
   controls.update()
