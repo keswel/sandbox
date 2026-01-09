@@ -16,11 +16,23 @@ const keys = {
   a: false,
   s: false,
   d: false,
+  i: false,
   space: false,
   shift: false
 }
 const speed = 0.05
 let orb_random_color_intensity = 2
+
+function isArrowKey(e) {
+  if (
+    e.key === "ArrowLeft" ||
+    e.key === "ArrowUp" ||
+    e.key === "ArrowDown" ||
+    e.key === "ArrowRight") {
+      return true;
+  }
+  return false;
+}
 
 window.addEventListener('keydown', (e) => {
   const key = e.key.toLowerCase()
@@ -28,6 +40,10 @@ window.addEventListener('keydown', (e) => {
   if (key in keys) keys[key] = true
   if (key === ' ') keys.space = true
   if (key === 'shift') keys.shift = true
+  if (isArrowKey(e)) {
+    star_shifting = true 
+    shiftStar(e);
+  }
 })
 
 window.addEventListener('keyup', (e) => {
@@ -36,6 +52,10 @@ window.addEventListener('keyup', (e) => {
   if (key in keys) keys[key] = false
   if (key === ' ') keys.space = false
   if (key === 'shift') keys.shift = false
+  if (isArrowKey(e)) {
+    star_shifting = false 
+    shiftStar(e);
+  }
 })
 
 
@@ -88,6 +108,7 @@ scene.add(cube)
 const star_width = 100;
 const star_length = 100;
 const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+let star_shifting = false; 
 let star_array = new Array()
 for (let i=0; i<1000; i++) {
   const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.2, 32, 10), star_material)
@@ -111,9 +132,21 @@ for (let i=0; i<1000; i++) {
   star.material.color.copy(color)
 
   star_array.push(star)
-  scene.add(star)}
-// maybe i can convert all these stars into a single object and shift them so the center is 0
-      
+  scene.add(star)
+}
+function shiftStar(e) {
+  for (let i=0; i<star_array.length; i++) {
+    const star = star_array[i]
+
+    if (e.key === "ArrowLeft")  star.position.x -= speed
+    if (e.key === "ArrowUp")    star.position.y += speed
+    if (e.key === "ArrowDown")  star.position.y -= speed
+    if (e.key === "ArrowRight") star.position.x += speed
+  }
+}
+
+
+
 const controls = new PointerLockControls(camera, document.body)
 
 
@@ -185,7 +218,6 @@ const bloomPass = new UnrealBloomPass(
   0.85
 )
 function onClick() {
-  console.write("CLICKED")
   if (!controls.isLocked) return
   raycaster.setFromCamera({ x: 0, y: 0 }, camera)
 
@@ -208,6 +240,11 @@ function onClick() {
   }
 }
 
+function initStars() {
+  for (let i = 0; i < star_array.length; i++) {
+    star_array[i].userData.target = new THREE.Vector3(0, 2, 0)
+  }
+}
 
 
 composer.addPass(bloomPass)
@@ -217,12 +254,27 @@ function animate() {
   //cube.rotation.x += 0.01
   //cube.rotation.y += 0.01
 
-  for (let i=0; i<star_array.length; i++) {
-    star_array[i].position.x += 0.01
-    // star_array[i].material.color.r = Math.random() * orb_random_color_intensity + 0
-    
-    if (star_array[i].position.x > 50) star_array[i].position.x = -50
+  for (let i = 0; i < star_array.length; i++) {
+    const star = star_array[i]
+    const target = star.userData.target
+
+    if (target) {
+      // move 2% toward target each frame (adjust for speed)
+      star.position.lerp(target, 0.02)
+
+      // stop when close enough
+      if (star.position.distanceTo(target) < 0.05) {
+        star.position.copy(target)
+        star.userData.target = null
+      }
+    } else if (!star_shifting) {
+        // normal drifting movement
+        star.position.x += 0.01
+        if (star.position.x > 50) star.position.x = -50
+    }
   }
+
+  
   // if (orb_random_color_intensity < 10) orb_random_color_intensity += 0.01
 
   // WASD movement
@@ -234,6 +286,7 @@ function animate() {
   if (keys.a) camera.position.addScaledVector(right, -speed)
   if (keys.s) camera.position.addScaledVector(direction, -speed)
   if (keys.d) camera.position.addScaledVector(right, speed)
+  if (keys.i) initStars()
   if (keys.space) camera.position.y += speed
   if (keys.shift) camera.position.y -= speed
   controls.update()
