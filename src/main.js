@@ -4,9 +4,6 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
-import { Font, FontLoader } from 'three/addons/loaders/FontLoader.js'
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js'
-
 
 const scene = new THREE.Scene()
 scene.background = new THREE.Color(0xcccccc)
@@ -105,37 +102,48 @@ const cube = new THREE.Mesh(geometry, material)
 cube.position.set(0, 1, 0)
 scene.add(cube)
 */
-// Cube Stars
+//
+//
 const star_width = 100;
 const star_length = 100;
 const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
 let star_shifting = false; 
 let star_array = new Array()
-for (let i=0; i<1000; i++) {
-  const star = new THREE.Mesh(new THREE.SphereGeometry(0.1 * Math.random() + 0.2, 32, 10), star_material)
-  star.position.set(
-    Math.random() * star_width - 50,
-    Math.random() * 50 + 0,
-    Math.random() * star_length- 50
-  )
-  /*
-  const color = new THREE.Color(
-    Math.random() * orb_random_color_intensity + 1,
-    Math.random() * orb_random_color_intensity + 1,
-    Math.random() * orb_random_color_intensity + 1
-  ) 
-  */
+function createRandomStars(star_count) {
+  for (let i=0; i<star_count; i++) {
+    const star = new THREE.Mesh(new THREE.SphereGeometry(0.01 * Math.random() + 0.1, 8, 8), star_material)
+    star.position.set(
+      Math.random() * star_width - 50,
+      Math.random() * 50 + 0,
+      Math.random() * star_length- 50
+    )
 
-  const color = new THREE.Color(
-    255 - 235,
-    209 - 207,
-    220 - 210
-  )
+    // ill pick a cooler color later lol
+    const color = new THREE.Color(
+      (255 - 235) / 255,
+      (209 - 207) / 255,
+      (220 - 210) / 255
+    )
 
-  star.material.color.copy(color)
+    star.material.color.copy(color)
 
-  star_array.push(star)
-  scene.add(star)
+    star_array.push(star)
+    scene.add(star)
+  }
+}
+function initStars() {
+  for (let i = 0; i < star_array.length; i++) {
+    star_array[i].userData.target = new THREE.Vector3(0, 2, 0)
+  }
+}
+function randomizeStars() {
+  for (let i=0; i<star_array.length; i++) {
+    star_array[i].position.set(
+      Math.random() * star_width - 50,
+      Math.random() * 50 + 0,
+      Math.random() * star_length- 50
+    )
+  }
 }
 function shiftStar(e) {
   for (let i=0; i<star_array.length; i++) {
@@ -147,8 +155,7 @@ function shiftStar(e) {
     if (e.key === "ArrowRight") star.position.x += speed
   }
 }
-
-
+createRandomStars(1000)
 
 const controls = new PointerLockControls(camera, document.body)
 
@@ -243,27 +250,11 @@ function onClick() {
   }
 }
 
-function initStars() {
-  for (let i = 0; i < star_array.length; i++) {
-    star_array[i].userData.target = new THREE.Vector3(0, 2, 0)
-  }
-}
-function randomizeStars() {
-  for (let i=0; i<star_array.length; i++) {
-    star_array[i].position.set(
-      Math.random() * star_width - 50,
-      Math.random() * 50 + 0,
-      Math.random() * star_length- 50
-    )
-  }
-}
 
 composer.addPass(bloomPass)
 composer.addPass(filmPass)
 function animate() {
   requestAnimationFrame(animate)
-  //cube.rotation.x += 0.01
-  //cube.rotation.y += 0.01
 
   for (let i = 0; i < star_array.length; i++) {
     const star = star_array[i]
@@ -281,7 +272,9 @@ function animate() {
     } else if (!star_shifting) {
         // normal drifting movement
         star.position.x += 0.01
+        star.position.y += 0.01
         if (star.position.x > 50) star.position.x = -50
+        if (star.position.y > 50) star.position.y = 0
     }
   }
 
