@@ -6,7 +6,7 @@ import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0xcccccc)
+scene.background = new THREE.Color(0x141019)
 
 const keys = { 
   w: false,
@@ -95,18 +95,17 @@ renderer.domElement.addEventListener('click', () => {
   }
   onClick()
 })
-/* Cube
-const geometry = new THREE.BoxGeometry()
-const material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
-const cube = new THREE.Mesh(geometry, material)
-cube.position.set(0, 1, 0)
-scene.add(cube)
-*/
 //
 //
 const star_width = 100;
 const star_length = 100;
-const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+//const star_material = new THREE.MeshBasicMaterial({ color: 0xffffff })
+
+const star_material = new THREE.MeshStandardMaterial({
+  color: 0xffffff,
+  emissive: 0xffffff,
+  emissiveIntensity: 1.5
+})
 let star_shifting = false; 
 let star_array = new Array()
 function createRandomStars(star_count) {
@@ -159,8 +158,6 @@ createRandomStars(1000)
 
 const controls = new PointerLockControls(camera, document.body)
 
-
-// Floor plane
 const floorGeometry = new THREE.PlaneGeometry(100, 100)
 const floorMaterial = new THREE.MeshStandardMaterial()
 const floor = new THREE.Mesh(floorGeometry, floorMaterial)
@@ -168,7 +165,8 @@ floor.rotation.x = -Math.PI / 2
 floor.position.y = 0
 floor.material = new THREE.MeshPhongMaterial({
   color: 0x3C0061,
-  shininess: 100,
+  specular: 0xffffff,
+  shininess: 300,
 })
 
 floor.receiveShadow = true
@@ -199,10 +197,17 @@ mp3_back.position.set(-button_gap, 1, 0.1)
 
 
 // Light
-const light = new THREE.DirectionalLight(0xffffff, 4.2)
-light.position.set(-0, 3, 5)
-//light.position.set(5, 100, 5)
-scene.add(light)
+const hemi = new THREE.HemisphereLight(
+  0xffffff, // sky color
+  0x444444, // ground color
+  1.6       // intensity
+)
+scene.add(hemi)
+const light_cube_geometry = new THREE.BoxGeometry()
+const light_cube_material = new THREE.MeshStandardMaterial({ color: 0x3C0061 })
+const light_cube = new THREE.Mesh(light_cube_geometry, light_cube_material)
+light_cube.position.set(0, 3, -5)
+scene.add(light_cube)
 
 // resize handling
 window.addEventListener('resize', () => {
@@ -218,7 +223,7 @@ const composer = new EffectComposer(renderer)
 const renderPass = new RenderPass(scene, camera)
 composer.addPass(renderPass)
 const filmPass = new FilmPass(
-  0.15, 
+  0.1, 
   0.9,
 )
 const bloomPass = new UnrealBloomPass(
