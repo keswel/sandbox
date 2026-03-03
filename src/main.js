@@ -6,8 +6,7 @@ import { FilmPass } from 'three/examples/jsm/postprocessing/FilmPass.js'
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 
 const scene = new THREE.Scene()
-scene.background = new THREE.Color(0x141019)
-
+scene.background = new THREE.Color(0x222222)
 const keys = { 
   w: false,
   a: false,
@@ -154,7 +153,7 @@ function shiftStar(e) {
     if (e.key === "ArrowRight") star.position.x += speed
   }
 }
-createRandomStars(1000)
+createRandomStars(100)
 
 const controls = new PointerLockControls(camera, document.body)
 
@@ -172,7 +171,7 @@ floor.material = new THREE.MeshPhongMaterial({
 floor.receiveShadow = true
 scene.add(floor)  
 
-// mp3 player
+/* mp3 player
 const mp3_backboard_geometry = new THREE.BoxGeometry(2, 1, 0.1)
 const mp3_play_geometry = new THREE.BoxGeometry(0.5, 0.5, 0.1)
 
@@ -192,15 +191,15 @@ mp3_back.position.set(-button_gap, 1, 0.1)
 // scene.add(mp3_backboard)
 // scene.add(mp3_play)
 // scene.add(mp3_skip)
-// scene.add(mp3_back)
-
+/. scene.add(mp3_back)
+*/
 
 
 // Light
 const hemi = new THREE.HemisphereLight(
   0xffffff, // sky color
   0x444444, // ground color
-  1.6       // intensity
+  3.6       // intensity
 )
 scene.add(hemi)
 const light_cube_geometry = new THREE.BoxGeometry()
@@ -298,7 +297,7 @@ function animate() {
   if (keys.i) initStars()
   if (keys.o) randomizeStars()
   if (keys.space) camera.position.y += speed
-  if (keys.shift) camera.position.y -= speed
+  if (keys.shift) camera.position.y -= camera.position.y > floor.position.y + 1 ? speed : 0;
   controls.update()
   composer.render()
 
